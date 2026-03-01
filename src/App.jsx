@@ -13,31 +13,17 @@ function App() {
   return (
     <div className="min-h-screen bg-impact-darker text-white overflow-x-hidden">
       <Navbar />
-
-      <main className="flex flex-col">
-        <Hero />
-
-        <section className="py-12 md:py-20">
-          <About />
-        </section>
-
-        <section className="py-12 md:py-20">
-          <Services />
-        </section>
-
-        <section className="py-12 md:py-20">
-          <Pricing />
-        </section>
-
-        <section className="py-12 md:py-20">
-          <Gallery />
-        </section>
-
-        <section className="py-12 md:py-20">
-          <Contact />
-        </section>
-      </main>
-
+      <Hero />
+      <div className="h-8 md:h-12 bg-impact-darker" />
+      <About />
+      <div className="h-8 md:h-12 bg-impact-darker" />
+      <Services />
+      <div className="h-8 md:h-12 bg-impact-darker" />
+      <Pricing />
+      <div className="h-8 md:h-12 bg-impact-darker" />
+      <Gallery />
+      <div className="h-8 md:h-12 bg-impact-darker" />
+      <Contact />
       <Footer />
       <ScrollToTop />
     </div>
