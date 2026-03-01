@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-scroll'
 import { HiMenuAlt3, HiX } from 'react-icons/hi'
@@ -8,84 +8,93 @@ import { navLinks } from '../constants/data'
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const menuRef = useRef(null)
 
+  // Scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+      setIsScrolled(window.scrollY > 40)
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Lock body scroll
   useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'auto'
+  }, [isMobileMenuOpen])
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
     if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
+      document.addEventListener('mousedown', handleClickOutside)
     }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
+
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isMobileMenuOpen])
 
   return (
     <>
       <motion.nav
-        initial={{ y: -100 }}
+        initial={{ y: -80 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: 0.6 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? 'bg-impact-darker/95 backdrop-blur-xl shadow-2xl shadow-black/50 border-b border-impact-border/50'
-            : 'bg-transparent'
+            ? 'bg-impact-darker/95 backdrop-blur-xl shadow-xl border-b border-impact-border/40 py-3'
+            : 'bg-transparent py-5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-16">
-          <div className="flex items-center justify-between py-5">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-16">
+          <div className="flex items-center justify-between">
+
             {/* Logo */}
             <Link
               to="home"
-              smooth={true}
+              smooth
               duration={800}
               className="flex items-center gap-3 cursor-pointer group"
             >
-              <div className="relative">
-                <FaBolt className="text-2xl md:text-3xl text-impact-blue group-hover:text-impact-cyan transition-colors duration-300" />
-                <div className="absolute inset-0 bg-impact-blue/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg md:text-xl font-black tracking-tight leading-none">
+              <FaBolt className="text-2xl md:text-3xl text-impact-blue group-hover:text-impact-cyan transition duration-300" />
+              <div className="leading-none">
+                <div className="text-base sm:text-lg md:text-xl font-black tracking-tight">
                   RAM&apos;S <span className="text-impact-blue">FITNESS</span>
-                </span>
-                <span className="text-[9px] md:text-[10px] font-bold tracking-[0.35em] text-impact-gold uppercase mt-0.5">
+                </div>
+                <div className="text-[8px] sm:text-[9px] font-bold tracking-[0.35em] text-impact-gold uppercase">
                   Club IMPACT
-                </span>
+                </div>
               </div>
             </Link>
 
-            {/* Desktop Nav Links */}
-            <div className="hidden lg:flex items-center gap-10">
+            {/* Desktop Nav */}
+            <div className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.to}
-                  smooth={true}
+                  smooth
                   duration={800}
-                  offset={-100}
-                  spy={true}
+                  offset={-90}
+                  spy
                   activeClass="text-impact-blue"
-                  className="text-sm font-medium text-gray-300 hover:text-white cursor-pointer transition-colors duration-300 relative group py-2"
+                  className="text-sm font-medium text-gray-300 hover:text-white cursor-pointer transition duration-300 relative group"
                 >
                   {link.name}
-                  <span className="absolute -bottom-0 left-0 w-0 h-0.5 bg-impact-blue group-hover:w-full transition-all duration-300 rounded-full" />
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-impact-blue group-hover:w-full transition-all duration-300 rounded-full" />
                 </Link>
               ))}
             </div>
 
             {/* Desktop CTA */}
             <div className="hidden lg:block">
-              <Link to="contact" smooth={true} duration={800} offset={-100}>
-                <button className="bg-gradient-to-r from-impact-blue to-impact-cyan text-white px-8 py-3 rounded-full text-sm font-semibold hover:scale-105 hover:shadow-lg hover:shadow-impact-blue/25 transition-all duration-300 cursor-pointer">
+              <Link to="contact" smooth duration={800} offset={-90}>
+                <button className="bg-gradient-to-r from-impact-blue to-impact-cyan text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:scale-105 transition duration-300">
                   Join Now
                 </button>
               </Link>
@@ -94,7 +103,8 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden text-white text-3xl z-50 relative cursor-pointer"
+              aria-label="Toggle Menu"
+              className="lg:hidden text-white text-3xl relative z-50"
             >
               {isMobileMenuOpen ? <HiX /> : <HiMenuAlt3 />}
             </button>
@@ -106,49 +116,45 @@ const Navbar = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="fixed inset-0 z-40 bg-impact-darker/98 backdrop-blur-2xl flex flex-col items-center justify-center"
+            ref={menuRef}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ duration: 0.35 }}
+            className="fixed inset-0 z-40 bg-impact-darker flex flex-col items-center justify-center text-center px-6"
           >
-            <div className="flex flex-col items-center gap-10">
+            <div className="flex flex-col gap-8">
               {navLinks.map((link, index) => (
                 <motion.div
                   key={link.name}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.4 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   <Link
                     to={link.to}
-                    smooth={true}
+                    smooth
                     duration={800}
-                    offset={-100}
+                    offset={-90}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-3xl font-semibold text-gray-200 hover:text-impact-blue cursor-pointer transition-colors duration-300"
+                    className="text-2xl font-semibold text-gray-200 hover:text-impact-blue transition duration-300"
                   >
                     {link.name}
                   </Link>
                 </motion.div>
               ))}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.4 }}
+
+              <Link
+                to="contact"
+                smooth
+                duration={800}
+                offset={-90}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                <Link
-                  to="contact"
-                  smooth={true}
-                  duration={800}
-                  offset={-100}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <button className="mt-6 bg-gradient-to-r from-impact-blue to-impact-cyan text-white px-12 py-5 rounded-full text-xl font-semibold hover:scale-105 transition-all duration-300 cursor-pointer">
-                    Join Now
-                  </button>
-                </Link>
-              </motion.div>
+                <button className="mt-6 bg-gradient-to-r from-impact-blue to-impact-cyan text-white px-10 py-3.5 rounded-full text-lg font-semibold hover:scale-105 transition duration-300">
+                  Join Now
+                </button>
+              </Link>
             </div>
           </motion.div>
         )}
